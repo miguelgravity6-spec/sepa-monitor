@@ -320,6 +320,11 @@ function startNewRound() {
     document.getElementById('speed-input').value = '';
     document.getElementById('round-observations').value = '';
 
+    const roundOp = document.getElementById('round-operator');
+    if (roundOp) roundOp.value = '';
+    const roundShift = document.getElementById('round-shift');
+    if (roundShift) roundShift.value = '';
+
     addActivity('info', `Ronda #${state.roundNumber} iniciada.`);
     showToast('info', `Ronda #${state.roundNumber} iniciada. Complete todos los puntos de verificación.`);
 }
@@ -328,6 +333,14 @@ function completeRound() {
     if (!state.roundActive) return;
 
     // Gather data
+    const operator = document.getElementById('round-operator').value;
+    const shift = document.getElementById('round-shift').value;
+
+    if (!operator || !shift) {
+        showToast('warning', '⚠️ Debe seleccionar Operador y Turno para completar la ronda.');
+        return;
+    }
+
     const checks = {};
     document.querySelectorAll('.check-input').forEach(cb => {
         checks[cb.dataset.check] = cb.checked;
@@ -358,6 +371,8 @@ function completeRound() {
         time: now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
         date: now.toLocaleDateString('es-CL'),
         timestamp: now.toISOString(),
+        operator,
+        shift,
         checks,
         statuses,
         speed: speed || null,
@@ -389,7 +404,7 @@ function completeRound() {
     // Log
     let statusText = hasCriticals ? 'con hallazgos CRÍTICOS' : hasWarnings ? 'con observaciones' : 'sin novedad';
     addActivity(hasCriticals ? 'danger' : hasWarnings ? 'warning' : 'success',
-        `Ronda #${round.number} completada ${statusText}. (${round.completedItems}/${round.totalItems} ítems)`);
+        `Ronda #${round.number} completada por ${operator} (${shift}) ${statusText}. (${round.completedItems}/${round.totalItems} ítems)`);
 
     if (hasCriticals) {
         showToast('danger', `⚠️ Ronda #${round.number} tiene hallazgos CRÍTICOS. Revise inmediatamente.`);
@@ -415,6 +430,9 @@ function renderRoundHistory() {
         let badgeClass = r.hasCriticals ? 'critical' : r.hasWarnings ? 'warning' : 'ok';
         let badgeText = r.hasCriticals ? 'Crítico' : r.hasWarnings ? 'Atención' : 'OK';
         let summary = [];
+        if (r.operator && r.shift) {
+            summary.push(`Op: ${r.operator} (${r.shift})`);
+        }
         if (r.speed) summary.push(`Vel: ${r.speed} RPM`);
         summary.push(`${r.completedItems}/${r.totalItems} ítems`);
 
@@ -557,6 +575,7 @@ function deleteMeasurement(id) {
 // ===== REPORT GENERATION =====
 function generateReport() {
     const operator = document.getElementById('report-operator').value;
+    const shift = document.getElementById('report-shift').value;
     const statusEl = document.getElementById('report-status');
     const statusText = statusEl.options[statusEl.selectedIndex].text;
     const observations = document.getElementById('report-observations').value;
@@ -572,6 +591,7 @@ function generateReport() {
 📅 Fecha: ${dateStr}
 🕐 Hora del reporte: ${timeStr}
 👷 Operador: ${operator}
+⏱️ Turno: ${shift}
 📊 Estado del equipo: ${statusText}
 
 ───────────────────────────────────────────
@@ -585,6 +605,7 @@ function generateReport() {
         state.rounds.forEach(r => {
             const status = r.hasCriticals ? '🔴 CRÍTICO' : r.hasWarnings ? '⚠️ ATENCIÓN' : '✅ OK';
             report += `\n  Ronda #${r.number} — ${r.time} — ${status}`;
+            if (r.operator && r.shift) report += ` (Op: ${r.operator} - ${r.shift})`;
             if (r.speed) report += `\n    Velocidad: ${r.speed} RPM`;
             report += `\n    Ítems completados: ${r.completedItems}/${r.totalItems}`;
             if (r.observations) report += `\n    Observaciones: ${r.observations}`;
@@ -619,14 +640,14 @@ function generateReport() {
 ───────────────────────────────────────────
   NOTA: Para despacho se utiliza SILO 1.
   Ante falla en rodamientos → DETENER EQUIPO.
-═══════════════════════════════════════════
+  ═══════════════════════════════════════════
 `;
 
     document.getElementById('report-preview').textContent = report;
     document.getElementById('report-preview-panel').style.display = 'block';
     document.getElementById('report-preview-panel').scrollIntoView({ behavior: 'smooth' });
 
-    addActivity('info', `Reporte de turno generado por ${operator}.`);
+    addActivity('info', `Reporte de turno generado por ${operator} (${shift}).`);
     showToast('success', 'Reporte generado exitosamente.');
 }
 

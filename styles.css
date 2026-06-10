@@ -1583,4 +1583,27 @@ body {
     .shift-indicator {
         display: none;
     }
+    .round-entry {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px;
+    }
+    .round-summary {
+        width: 100%;
+        flex: none;
+        order: 3;
+        margin-top: 4px;
+        font-size: 0.78rem;
+    }
+    .round-number {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+    .round-time {
+        font-size: 0.75rem;
+    }
+    .round-badge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
 }

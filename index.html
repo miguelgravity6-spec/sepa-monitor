@@ -209,6 +209,18 @@
                                     <span>Pendiente</span>
                                 </div>
                             </div>
+                            <div class="responsible-card" id="resp-alam">
+                                <div class="resp-avatar" style="background: var(--accent-blue-dim); color: var(--accent-blue);">A</div>
+                                <div class="resp-info">
+                                    <h3>Alam</h3>
+                                    <span class="resp-shift">Turno Tarde ⛅</span>
+                                    <p>Realizar mediciones de vibración y temperatura en terreno. Reportar desviaciones.</p>
+                                </div>
+                                <div class="resp-status" id="alam-status">
+                                    <span class="resp-status-dot pending"></span>
+                                    <span>Pendiente</span>
+                                </div>
+                            </div>
                             <div class="responsible-card" id="resp-miguel">
                                 <div class="resp-avatar">M</div>
                                 <div class="resp-info">
@@ -258,6 +270,30 @@
                 </div>
 
                 <div class="checklist-container" id="checklist-container">
+                    <div class="checklist-group">
+                        <h3 class="checklist-group-title">👤 Datos de la Ronda</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 4px;">
+                            <div class="form-group-custom">
+                                <label for="round-operator" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Operador</label>
+                                <select id="round-operator" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); outline: none; font-size: 0.85rem;" required>
+                                    <option value="">Seleccionar Operador...</option>
+                                    <option value="HUGO">HUGO</option>
+                                    <option value="ALAM">ALAM</option>
+                                    <option value="MIGUEL">MIGUEL</option>
+                                </select>
+                            </div>
+                            <div class="form-group-custom">
+                                <label for="round-shift" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Turno</label>
+                                <select id="round-shift" style="width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); outline: none; font-size: 0.85rem;" required>
+                                    <option value="">Seleccionar Turno...</option>
+                                    <option value="DIA">DIA</option>
+                                    <option value="TARDE">TARDE</option>
+                                    <option value="NOCHE">NOCHE</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="checklist-group">
                         <h3 class="checklist-group-title">🔊 Inspección Auditiva y Visual</h3>
                         <label class="checklist-item" id="check-noise">
@@ -487,8 +523,17 @@
                             <div class="form-group">
                                 <label for="report-operator">Operador</label>
                                 <select id="report-operator">
-                                    <option value="Hugo">Hugo (Turno Día)</option>
-                                    <option value="Miguel">Miguel (Turno Noche)</option>
+                                    <option value="HUGO">HUGO</option>
+                                    <option value="ALAM">ALAM</option>
+                                    <option value="MIGUEL">MIGUEL</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="report-shift">Turno</label>
+                                <select id="report-shift">
+                                    <option value="DIA">DIA</option>
+                                    <option value="TARDE">TARDE</option>
+                                    <option value="NOCHE">NOCHE</option>
                                 </select>
                             </div>
                             <div class="form-group">
