@@ -94,6 +94,20 @@ function saveRoundToFirebase(round) {
     firebasePush('sepa-monitor/rounds', round);
 }
 
+// Delete a round from Firebase
+function deleteRoundFromFirebase(roundId) {
+    if (!isFirebaseReady()) return;
+    firebaseGet('sepa-monitor/rounds').then(data => {
+        if (!data) return;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === roundId) {
+                firebaseRemove(`sepa-monitor/rounds/${key}`);
+                break;
+            }
+        }
+    });
+}
+
 // Save a measurement to Firebase
 function saveMeasurementToFirebase(measurement) {
     if (!isFirebaseReady()) return;
@@ -248,6 +262,8 @@ function updateRoundTimer() {
 
     if (diff <= 0) {
         document.getElementById('kpi-next-round-value').textContent = '¡AHORA!';
+        const checklistTimer = document.getElementById('checklist-timer-display');
+        if (checklistTimer) checklistTimer.textContent = '00:00';
         document.getElementById('kpi-progress-bar').style.width = '100%';
         showToast('warning', '⏰ Es hora de realizar la ronda de control.');
         clearInterval(state.roundTimerInterval);
@@ -260,7 +276,11 @@ function updateRoundTimer() {
 
     const mins = Math.floor(diff / 60000);
     const secs = Math.floor((diff % 60000) / 1000);
-    document.getElementById('kpi-next-round-value').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const timeString = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    
+    document.getElementById('kpi-next-round-value').textContent = timeString;
+    const checklistTimer = document.getElementById('checklist-timer-display');
+    if (checklistTimer) checklistTimer.textContent = timeString;
 
     // Progress bar
     const totalMs = 60 * 60 * 1000;
@@ -298,7 +318,6 @@ function startNewRound() {
     document.querySelectorAll('.check-input').forEach(cb => cb.checked = false);
     document.querySelectorAll('.check-status-select').forEach(sel => sel.value = 'normal');
     document.getElementById('speed-input').value = '';
-    document.getElementById('temp-input').value = '';
     document.getElementById('round-observations').value = '';
 
     addActivity('info', `Ronda #${state.roundNumber} iniciada.`);
@@ -320,7 +339,6 @@ function completeRound() {
     });
 
     const speed = document.getElementById('speed-input').value;
-    const temp = document.getElementById('temp-input').value;
     const observations = document.getElementById('round-observations').value;
 
     // Check for warnings/criticals
@@ -335,6 +353,7 @@ function completeRound() {
 
     const now = new Date();
     const round = {
+        id: Date.now(),
         number: state.roundNumber,
         time: now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
         date: now.toLocaleDateString('es-CL'),
@@ -342,7 +361,6 @@ function completeRound() {
         checks,
         statuses,
         speed: speed || null,
-        temp: temp || null,
         observations,
         hasWarnings: hasWarnings || hasCriticals,
         hasCriticals,
@@ -398,7 +416,6 @@ function renderRoundHistory() {
         let badgeText = r.hasCriticals ? 'Crítico' : r.hasWarnings ? 'Atención' : 'OK';
         let summary = [];
         if (r.speed) summary.push(`Vel: ${r.speed} RPM`);
-        if (r.temp) summary.push(`Temp: ${r.temp}°C`);
         summary.push(`${r.completedItems}/${r.totalItems} ítems`);
 
         return `
@@ -407,9 +424,21 @@ function renderRoundHistory() {
                 <span class="round-time">${r.time}</span>
                 <span class="round-summary">${summary.join(' · ')}</span>
                 <span class="round-badge ${badgeClass}">${badgeText}</span>
+                <button class="btn-icon btn-delete-round" onclick="deleteRound(${r.id})" style="color: #ff4757; margin-left: 10px;" title="Borrar ronda">✕</button>
             </div>
         `;
     }).join('');
+}
+
+function deleteRound(id) {
+    if (confirm('¿Está seguro de que desea eliminar esta ronda?')) {
+        deleteRoundFromFirebase(id);
+        state.rounds = state.rounds.filter(r => r.id !== id);
+        renderRoundHistory();
+        updateKPIs();
+        saveState();
+        showToast('info', 'Ronda eliminada.');
+    }
 }
 
 // ===== MEASUREMENTS =====
@@ -557,7 +586,6 @@ function generateReport() {
             const status = r.hasCriticals ? '🔴 CRÍTICO' : r.hasWarnings ? '⚠️ ATENCIÓN' : '✅ OK';
             report += `\n  Ronda #${r.number} — ${r.time} — ${status}`;
             if (r.speed) report += `\n    Velocidad: ${r.speed} RPM`;
-            if (r.temp) report += `\n    Temperatura: ${r.temp}°C`;
             report += `\n    Ítems completados: ${r.completedItems}/${r.totalItems}`;
             if (r.observations) report += `\n    Observaciones: ${r.observations}`;
             report += '\n';
@@ -793,5 +821,6 @@ window.showEmergencyModal = showEmergencyModal;
 window.closeEmergencyModal = closeEmergencyModal;
 window.confirmEmergencyStop = confirmEmergencyStop;
 window.clearActivityLog = clearActivityLog;
+window.deleteRound = deleteRound;
 
 document.addEventListener('DOMContentLoaded', init);

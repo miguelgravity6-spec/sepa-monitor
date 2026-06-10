@@ -248,6 +248,7 @@
                 <div class="section-header">
                     <h2>🔄 Ronda de Control Horario</h2>
                     <div class="section-actions">
+                        <span class="round-timer-badge" style="margin-right: 15px; font-weight: 600; color: #ff9f43;">Próxima: <span id="checklist-timer-display">--:--</span></span>
                         <span class="round-counter" id="round-counter">Ronda #1</span>
                         <button class="btn btn-primary" id="btn-start-round" onclick="startNewRound()">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -335,25 +336,6 @@
                                 <input type="number" class="inline-input" id="speed-input" placeholder="RPM" step="0.1">
                                 <span class="inline-unit">RPM</span>
                             </div>
-                        </label>
-                        <label class="checklist-item" id="check-temp">
-                            <input type="checkbox" class="check-input" data-check="temp">
-                            <span class="check-box"></span>
-                            <span class="check-label">Registrar <strong>temperatura</strong></span>
-                            <div class="check-inline-input">
-                                <input type="number" class="inline-input" id="temp-input" placeholder="°C" step="0.1">
-                                <span class="inline-unit">°C</span>
-                            </div>
-                        </label>
-                        <label class="checklist-item" id="check-cement">
-                            <input type="checkbox" class="check-input" data-check="cement">
-                            <span class="check-box"></span>
-                            <span class="check-label">Verificar <strong>stock de cemento especial</strong></span>
-                            <select class="check-status-select" data-check="cement-status">
-                                <option value="normal">✅ Suficiente</option>
-                                <option value="warning">⚠️ Bajo</option>
-                                <option value="critical">🔴 Crítico</option>
-                            </select>
                         </label>
                     </div>
 
