@@ -1,0 +1,19 @@
+# Credentials & secrets
+surge_input.txt
+*.env
+.env.*
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log

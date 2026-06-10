@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Monitoreo y Control del Separador Industrial - Dashboard de control operacional">
+    <title>SEPA Monitor | Control del Separador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="app-header" id="app-header">
+        <div class="header-left">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="url(#logoGrad)" stroke-width="2.5" fill="none"/>
+                        <circle cx="20" cy="20" r="10" stroke="url(#logoGrad)" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+                        <circle cx="20" cy="20" r="3" fill="url(#logoGrad)"/>
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#00d4ff"/>
+                                <stop offset="100%" stop-color="#7b2ff7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>SEPA Monitor</h1>
+                    <span class="logo-subtitle">Control del Separador</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="status-badge" id="status-badge">
+                <span class="status-dot"></span>
+                <span class="status-text">EN OPERACIÓN</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-clock" id="header-clock">
+                <span class="clock-time">--:--:--</span>
+                <span class="clock-date">-- / -- / ----</span>
+            </div>
+            <div class="shift-indicator" id="shift-indicator">
+                <span class="shift-icon">☀️</span>
+                <span class="shift-label">Turno Día</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ALERT BANNER -->
+    <div class="alert-banner" id="alert-banner">
+        <div class="alert-content">
+            <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <p><strong>⚠️ ALERTA ACTIVA:</strong> Separador con síntomas anormales. Monitoreo cada 1 hora. Si hay falla evidente en rodamientos → <strong>DETENER INMEDIATAMENTE.</strong></p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content">
+        <!-- SIDEBAR NAV -->
+        <nav class="sidebar" id="sidebar">
+            <button class="nav-btn active" data-section="dashboard" id="nav-dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-btn" data-section="checklist" id="nav-checklist">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span>Rondas</span>
+            </button>
+            <button class="nav-btn" data-section="measurements" id="nav-measurements">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span>Mediciones</span>
+            </button>
+            <button class="nav-btn" data-section="reports" id="nav-reports">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Reportes</span>
+            </button>
+            <button class="nav-btn" data-section="dispatch" id="nav-dispatch">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Despacho</span>
+            </button>
+            <div class="nav-spacer"></div>
+            <button class="nav-btn emergency-btn" id="nav-emergency" onclick="showEmergencyModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>PARADA</span>
+            </button>
+        </nav>
+
+        <!-- SECTIONS CONTAINER -->
+        <div class="sections-container" id="sections-container">
+
+            <!-- ====== DASHBOARD SECTION ====== -->
+            <section class="section active" id="section-dashboard">
+                <!-- KPI Cards Row -->
+                <div class="kpi-row">
+                    <div class="kpi-card" id="kpi-next-round">
+                        <div class="kpi-icon blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Próxima Ronda</span>
+                            <span class="kpi-value" id="kpi-next-round-value">--:--</span>
+                        </div>
+                        <div class="kpi-progress">
+                            <div class="kpi-progress-bar" id="kpi-progress-bar"></div>
+                        </div>
+                    </div>
+                    <div class="kpi-card" id="kpi-rounds-done">
+                        <div class="kpi-icon green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Rondas Completadas</span>
+                            <span class="kpi-value" id="kpi-rounds-done-value">0 / 0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card" id="kpi-anomalies">
+                        <div class="kpi-icon orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Anomalías Reportadas</span>
+                            <span class="kpi-value" id="kpi-anomalies-value">0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card" id="kpi-speed">
+                        <div class="kpi-icon purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Velocidad Separador</span>
+                            <span class="kpi-value" id="kpi-speed-value">-- RPM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Instrucciones Panel -->
+                    <div class="panel instructions-panel" id="instructions-panel">
+                        <div class="panel-header">
+                            <h2>📋 Instrucciones Activas</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="instruction-list">
+                                <div class="instruction-item priority-high">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        <strong>Monitoreo permanente</strong> — Controles cada <em>1 hora</em>.
+                                    </div>
+                                </div>
+                                <div class="instruction-item priority-high">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        Verificar <strong>ruidos anormales, vibraciones</strong> u otras condiciones fuera de lo normal.
+                                    </div>
+                                </div>
+                                <div class="instruction-item priority-medium">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        Realizar <strong>mediciones en terreno</strong> con equipo e informar vía correo.
+                                    </div>
+                                </div>
+                                <div class="instruction-item priority-medium">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        Revisar <strong>tacho de gravilla</strong> — observar anomalías + salida de bolas (polines rodamiento).
+                                    </div>
+                                </div>
+                                <div class="instruction-item priority-low">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        Arrancar con <strong>cemento especial</strong> y aumentar stock.
+                                    </div>
+                                </div>
+                                <div class="instruction-item priority-critical">
+                                    <div class="instruction-marker"></div>
+                                    <div class="instruction-content">
+                                        <strong>CRÍTICO:</strong> Si se detectan síntomas de falla en rodamientos → <strong>DETENER INMEDIATAMENTE</strong>.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Responsables Panel -->
+                    <div class="panel responsible-panel" id="responsible-panel">
+                        <div class="panel-header">
+                            <h2>👥 Responsables del Turno</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="responsible-card" id="resp-hugo">
+                                <div class="resp-avatar">H</div>
+                                <div class="resp-info">
+                                    <h3>Hugo</h3>
+                                    <span class="resp-shift">Turno Día ☀️</span>
+                                    <p>Verificar comportamiento del equipo en operación. Enviar correo con <strong>velocidad del separador</strong>.</p>
+                                </div>
+                                <div class="resp-status" id="hugo-status">
+                                    <span class="resp-status-dot pending"></span>
+                                    <span>Pendiente</span>
+                                </div>
+                            </div>
+                            <div class="responsible-card" id="resp-miguel">
+                                <div class="resp-avatar">M</div>
+                                <div class="resp-info">
+                                    <h3>Miguel</h3>
+                                    <span class="resp-shift">Turno Noche 🌙</span>
+                                    <p>Replicar <strong>mismo control y reporte</strong> durante turno nocturno.</p>
+                                </div>
+                                <div class="resp-status" id="miguel-status">
+                                    <span class="resp-status-dot pending"></span>
+                                    <span>Pendiente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Log -->
+                    <div class="panel activity-panel" id="activity-panel">
+                        <div class="panel-header">
+                            <h2>📜 Registro de Actividad</h2>
+                            <button class="btn-icon" onclick="clearActivityLog()" title="Limpiar registro">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                        <div class="panel-body">
+                            <div class="activity-log" id="activity-log">
+                                <div class="activity-empty">
+                                    <p>Sin actividad registrada aún.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== CHECKLIST (RONDAS) SECTION ====== -->
+            <section class="section" id="section-checklist">
+                <div class="section-header">
+                    <h2>🔄 Ronda de Control Horario</h2>
+                    <div class="section-actions">
+                        <span class="round-counter" id="round-counter">Ronda #1</span>
+                        <button class="btn btn-primary" id="btn-start-round" onclick="startNewRound()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Iniciar Ronda
+                        </button>
+                    </div>
+                </div>
+
+                <div class="checklist-container" id="checklist-container">
+                    <div class="checklist-group">
+                        <h3 class="checklist-group-title">🔊 Inspección Auditiva y Visual</h3>
+                        <label class="checklist-item" id="check-noise">
+                            <input type="checkbox" class="check-input" data-check="noise">
+                            <span class="check-box"></span>
+                            <span class="check-label">Verificar ausencia de <strong>ruidos anormales</strong></span>
+                            <select class="check-status-select" data-check="noise-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                        <label class="checklist-item" id="check-vibrations">
+                            <input type="checkbox" class="check-input" data-check="vibrations">
+                            <span class="check-box"></span>
+                            <span class="check-label">Verificar ausencia de <strong>vibraciones anormales</strong></span>
+                            <select class="check-status-select" data-check="vibrations-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                        <label class="checklist-item" id="check-visual">
+                            <input type="checkbox" class="check-input" data-check="visual">
+                            <span class="check-box"></span>
+                            <span class="check-label">Inspección visual general del equipo</span>
+                            <select class="check-status-select" data-check="visual-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="checklist-group">
+                        <h3 class="checklist-group-title">⚙️ Componentes Críticos</h3>
+                        <label class="checklist-item" id="check-bearings">
+                            <input type="checkbox" class="check-input" data-check="bearings">
+                            <span class="check-box"></span>
+                            <span class="check-label">Estado de <strong>rodamientos</strong> — sin indicios de falla</span>
+                            <select class="check-status-select" data-check="bearings-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                        <label class="checklist-item" id="check-gravel">
+                            <input type="checkbox" class="check-input" data-check="gravel">
+                            <span class="check-box"></span>
+                            <span class="check-label">Revisar <strong>tacho de gravilla</strong> y polines de rodamiento</span>
+                            <select class="check-status-select" data-check="gravel-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                        <label class="checklist-item" id="check-balls">
+                            <input type="checkbox" class="check-input" data-check="balls">
+                            <span class="check-box"></span>
+                            <span class="check-label">Verificar <strong>salida de bolas</strong> — cantidad y condición</span>
+                            <select class="check-status-select" data-check="balls-status">
+                                <option value="normal">✅ Normal</option>
+                                <option value="warning">⚠️ Atención</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="checklist-group">
+                        <h3 class="checklist-group-title">📊 Mediciones y Datos</h3>
+                        <label class="checklist-item" id="check-speed">
+                            <input type="checkbox" class="check-input" data-check="speed">
+                            <span class="check-box"></span>
+                            <span class="check-label">Registrar <strong>velocidad del separador</strong></span>
+                            <div class="check-inline-input">
+                                <input type="number" class="inline-input" id="speed-input" placeholder="RPM" step="0.1">
+                                <span class="inline-unit">RPM</span>
+                            </div>
+                        </label>
+                        <label class="checklist-item" id="check-temp">
+                            <input type="checkbox" class="check-input" data-check="temp">
+                            <span class="check-box"></span>
+                            <span class="check-label">Registrar <strong>temperatura</strong></span>
+                            <div class="check-inline-input">
+                                <input type="number" class="inline-input" id="temp-input" placeholder="°C" step="0.1">
+                                <span class="inline-unit">°C</span>
+                            </div>
+                        </label>
+                        <label class="checklist-item" id="check-cement">
+                            <input type="checkbox" class="check-input" data-check="cement">
+                            <span class="check-box"></span>
+                            <span class="check-label">Verificar <strong>stock de cemento especial</strong></span>
+                            <select class="check-status-select" data-check="cement-status">
+                                <option value="normal">✅ Suficiente</option>
+                                <option value="warning">⚠️ Bajo</option>
+                                <option value="critical">🔴 Crítico</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- Observations -->
+                    <div class="checklist-group">
+                        <h3 class="checklist-group-title">📝 Observaciones</h3>
+                        <textarea class="observations-textarea" id="round-observations" placeholder="Ingrese observaciones adicionales de la ronda..."></textarea>
+                    </div>
+
+                    <div class="checklist-actions">
+                        <button class="btn btn-success" id="btn-complete-round" onclick="completeRound()" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Completar Ronda
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Round History -->
+                <div class="panel round-history-panel" id="round-history-panel">
+                    <div class="panel-header">
+                        <h2>📖 Historial de Rondas</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="round-history" id="round-history">
+                            <p class="empty-state">No hay rondas completadas aún.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== MEASUREMENTS SECTION ====== -->
+            <section class="section" id="section-measurements">
+                <div class="section-header">
+                    <h2>📊 Registro de Mediciones en Terreno</h2>
+                    <button class="btn btn-primary" onclick="openMeasurementForm()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nueva Medición
+                    </button>
+                </div>
+
+                <!-- Measurement Form (Hidden by default) -->
+                <div class="measurement-form-container" id="measurement-form" style="display:none;">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>➕ Registrar Medición</h2>
+                            <button class="btn-icon" onclick="closeMeasurementForm()">✕</button>
+                        </div>
+                        <div class="panel-body">
+                            <form id="measurement-form-inner" onsubmit="saveMeasurement(event)">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="meas-type">Tipo de Medición</label>
+                                        <select id="meas-type" required>
+                                            <option value="">Seleccionar...</option>
+                                            <option value="vibration">Vibración</option>
+                                            <option value="temperature">Temperatura</option>
+                                            <option value="speed">Velocidad</option>
+                                            <option value="noise">Nivel de Ruido</option>
+                                            <option value="current">Corriente Eléctrica</option>
+                                            <option value="other">Otra</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="meas-value">Valor</label>
+                                        <input type="number" id="meas-value" step="0.01" required placeholder="Ej: 45.2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="meas-unit">Unidad</label>
+                                        <input type="text" id="meas-unit" placeholder="Ej: mm/s, °C, RPM">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="meas-location">Punto de Medición</label>
+                                        <input type="text" id="meas-location" placeholder="Ej: Rodamiento lado libre">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="meas-notes">Notas</label>
+                                        <textarea id="meas-notes" placeholder="Observaciones adicionales..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-ghost" onclick="closeMeasurementForm()">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Medición</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Measurements Table -->
+                <div class="panel">
+                    <div class="panel-body">
+                        <div class="table-container">
+                            <table class="data-table" id="measurements-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Tipo</th>
+                                        <th>Valor</th>
+                                        <th>Unidad</th>
+                                        <th>Punto</th>
+                                        <th>Notas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="measurements-tbody">
+                                    <tr class="empty-row">
+                                        <td colspan="7">
+                                            <div class="empty-state">
+                                                <p>No hay mediciones registradas. Haga clic en "Nueva Medición" para comenzar.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== REPORTS SECTION ====== -->
+            <section class="section" id="section-reports">
+                <div class="section-header">
+                    <h2>📄 Generar Reporte de Turno</h2>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>✉️ Preparar Correo de Reporte</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="report-operator">Operador</label>
+                                <select id="report-operator">
+                                    <option value="Hugo">Hugo (Turno Día)</option>
+                                    <option value="Miguel">Miguel (Turno Noche)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="report-status">Estado General del Equipo</label>
+                                <select id="report-status">
+                                    <option value="operativo">✅ Operativo con monitoreo</option>
+                                    <option value="atencion">⚠️ Requiere atención</option>
+                                    <option value="critico">🔴 Estado crítico</option>
+                                    <option value="detenido">⛔ Equipo detenido</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="report-observations">Observaciones del Turno</label>
+                                <textarea id="report-observations" rows="4" placeholder="Resumen de las condiciones observadas durante el turno..."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="generateReport()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                Generar Reporte
+                            </button>
+                            <button class="btn btn-ghost" onclick="copyReportToClipboard()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                Copiar al Portapapeles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Preview -->
+                <div class="panel" id="report-preview-panel" style="display:none;">
+                    <div class="panel-header">
+                        <h2>👁️ Vista Previa del Reporte</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="report-preview" id="report-preview"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== DISPATCH SECTION ====== -->
+            <section class="section" id="section-dispatch">
+                <div class="section-header">
+                    <h2>🏭 Control de Despacho</h2>
+                </div>
+
+                <div class="dispatch-grid">
+                    <div class="silo-card active-silo" id="silo-1-card">
+                        <div class="silo-visual">
+                            <div class="silo-shape">
+                                <div class="silo-fill" id="silo-1-fill" style="height: 72%;"></div>
+                                <span class="silo-label">SILO 1</span>
+                            </div>
+                        </div>
+                        <div class="silo-info">
+                            <span class="silo-status active">● ACTIVO — En uso para despacho</span>
+                            <div class="silo-detail">
+                                <span>Nivel estimado:</span>
+                                <strong>72%</strong>
+                            </div>
+                            <div class="silo-detail">
+                                <span>Producto:</span>
+                                <strong>Cemento</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="silo-card inactive-silo" id="silo-2-card">
+                        <div class="silo-visual">
+                            <div class="silo-shape">
+                                <div class="silo-fill" style="height: 45%;"></div>
+                                <span class="silo-label">SILO 2</span>
+                            </div>
+                        </div>
+                        <div class="silo-info">
+                            <span class="silo-status inactive">○ INACTIVO</span>
+                            <div class="silo-detail">
+                                <span>Nivel estimado:</span>
+                                <strong>45%</strong>
+                            </div>
+                            <div class="silo-detail">
+                                <span>Producto:</span>
+                                <strong>Cemento</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="silo-card inactive-silo" id="silo-3-card">
+                        <div class="silo-visual">
+                            <div class="silo-shape">
+                                <div class="silo-fill" style="height: 30%;"></div>
+                                <span class="silo-label">SILO 3</span>
+                            </div>
+                        </div>
+                        <div class="silo-info">
+                            <span class="silo-status inactive">○ INACTIVO</span>
+                            <div class="silo-detail">
+                                <span>Nivel estimado:</span>
+                                <strong>30%</strong>
+                            </div>
+                            <div class="silo-detail">
+                                <span>Producto:</span>
+                                <strong>Cemento</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>📋 Nota Operacional</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dispatch-note">
+                            <div class="dispatch-note-icon">ℹ️</div>
+                            <div class="dispatch-note-content">
+                                <p><strong>Instrucción vigente:</strong> Para el proceso de despacho, utilizar <strong>Silo 1</strong> exclusivamente.</p>
+                                <p>Se solicita actuar con la mayor rigurosidad y comunicar cualquier desviación de forma inmediata.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- EMERGENCY MODAL -->
+    <div class="modal-overlay" id="emergency-modal" style="display:none;">
+        <div class="modal emergency-modal">
+            <div class="modal-header emergency-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <h2>⛔ PARADA DE EMERGENCIA</h2>
+            </div>
+            <div class="modal-body">
+                <p class="emergency-text">¿Se han detectado <strong>síntomas evidentes de falla en rodamientos</strong>?</p>
+                <p class="emergency-sub">Al confirmar, se registrará la parada del equipo para dar inicio a las acciones correctivas.</p>
+                <div class="emergency-form">
+                    <label for="emergency-reason">Motivo de la parada:</label>
+                    <textarea id="emergency-reason" placeholder="Describa los síntomas detectados..." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeEmergencyModal()">Cancelar</button>
+                <button class="btn btn-danger" onclick="confirmEmergencyStop()">
+                    ⛔ CONFIRMAR PARADA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Firebase SDK (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <!-- App Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
