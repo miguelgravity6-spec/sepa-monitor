@@ -413,6 +413,16 @@ function renderRoundHistory() {
 }
 
 // ===== MEASUREMENTS =====
+function toggleMeasurementFields() {
+    const type = document.getElementById('meas-type').value;
+    document.getElementById('fields-vibration').style.display = type === 'vibration' ? 'grid' : 'none';
+    document.getElementById('fields-temperature').style.display = type === 'temperature' ? 'grid' : 'none';
+    
+    // Required fields based on type
+    document.getElementById('vib-1a').required = type === 'vibration';
+    document.getElementById('temp-rodamiento').required = type === 'temperature';
+}
+
 function openMeasurementForm() {
     document.getElementById('measurement-form').style.display = 'block';
     document.getElementById('measurement-form').scrollIntoView({ behavior: 'smooth' });
@@ -421,6 +431,7 @@ function openMeasurementForm() {
 function closeMeasurementForm() {
     document.getElementById('measurement-form').style.display = 'none';
     document.getElementById('measurement-form-inner').reset();
+    toggleMeasurementFields();
 }
 
 function saveMeasurement(e) {
@@ -429,10 +440,25 @@ function saveMeasurement(e) {
     const typeEl = document.getElementById('meas-type');
     const type = typeEl.value;
     const typeName = typeEl.options[typeEl.selectedIndex].text;
-    const value = document.getElementById('meas-value').value;
-    const unit = document.getElementById('meas-unit').value;
-    const location = document.getElementById('meas-location').value;
     const notes = document.getElementById('meas-notes').value;
+
+    let value = '';
+    let unit = '';
+    let location = 'Múltiples';
+
+    if (type === 'vibration') {
+        const v1a = document.getElementById('vib-1a').value;
+        const v1v = document.getElementById('vib-1v').value;
+        const v1h = document.getElementById('vib-1h').value;
+        value = `1A: ${v1a || '-'} | 1V: ${v1v || '-'} | 1H: ${v1h || '-'}`;
+        unit = 'mm/s';
+    } else if (type === 'temperature') {
+        const tRod = document.getElementById('temp-rodamiento').value;
+        const tRed = document.getElementById('temp-reductor').value;
+        const tMot = document.getElementById('temp-motor').value;
+        value = `Rod: ${tRod || '-'} | Reduct: ${tRed || '-'} | Motor: ${tMot || '-'}`;
+        unit = '°C';
+    }
 
     const now = new Date();
     const measurement = {
@@ -456,7 +482,7 @@ function saveMeasurement(e) {
     closeMeasurementForm();
     saveState();
 
-    addActivity('info', `Medición registrada: ${typeName} = ${value} ${unit}`);
+    addActivity('info', `Medición registrada: ${typeName}`);
     showToast('success', `Medición de ${typeName} registrada correctamente.`);
     updateKPIs();
 }

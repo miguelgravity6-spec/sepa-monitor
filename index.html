@@ -404,30 +404,47 @@
                         <div class="panel-body">
                             <form id="measurement-form-inner" onsubmit="saveMeasurement(event)">
                                 <div class="form-grid">
-                                    <div class="form-group">
+                                    <div class="form-group full-width">
                                         <label for="meas-type">Tipo de Medición</label>
-                                        <select id="meas-type" required>
+                                        <select id="meas-type" required onchange="toggleMeasurementFields()">
                                             <option value="">Seleccionar...</option>
                                             <option value="vibration">Vibración</option>
                                             <option value="temperature">Temperatura</option>
-                                            <option value="speed">Velocidad</option>
-                                            <option value="noise">Nivel de Ruido</option>
-                                            <option value="current">Corriente Eléctrica</option>
-                                            <option value="other">Otra</option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="meas-value">Valor</label>
-                                        <input type="number" id="meas-value" step="0.01" required placeholder="Ej: 45.2">
+                                    
+                                    <!-- Campos para Vibración -->
+                                    <div id="fields-vibration" class="dynamic-fields" style="display:none; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                        <div class="form-group">
+                                            <label for="vib-1a">Valor 1A (mm/s)</label>
+                                            <input type="number" id="vib-1a" step="0.01" placeholder="Ej: 2.5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vib-1v">Valor 1V (mm/s)</label>
+                                            <input type="number" id="vib-1v" step="0.01" placeholder="Ej: 3.1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vib-1h">Valor 1H (mm/s)</label>
+                                            <input type="number" id="vib-1h" step="0.01" placeholder="Ej: 1.8">
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="meas-unit">Unidad</label>
-                                        <input type="text" id="meas-unit" placeholder="Ej: mm/s, °C, RPM">
+
+                                    <!-- Campos para Temperatura -->
+                                    <div id="fields-temperature" class="dynamic-fields" style="display:none; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                        <div class="form-group">
+                                            <label for="temp-rodamiento">Rodamiento Inferior (°C)</label>
+                                            <input type="number" id="temp-rodamiento" step="0.1" placeholder="Ej: 45.2">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="temp-reductor">Reductor (°C)</label>
+                                            <input type="number" id="temp-reductor" step="0.1" placeholder="Ej: 52.0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="temp-motor">Motor (°C)</label>
+                                            <input type="number" id="temp-motor" step="0.1" placeholder="Ej: 60.5">
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="meas-location">Punto de Medición</label>
-                                        <input type="text" id="meas-location" placeholder="Ej: Rodamiento lado libre">
-                                    </div>
+
                                     <div class="form-group full-width">
                                         <label for="meas-notes">Notas</label>
                                         <textarea id="meas-notes" placeholder="Observaciones adicionales..."></textarea>
