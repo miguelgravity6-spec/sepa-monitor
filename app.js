@@ -28,13 +28,13 @@ async function loadState() {
             const fbActivityLog = await firebaseGet('sepa-monitor/activityLog');
 
             if (fbState) {
-                state.roundNumber = fbState.roundNumber || 1;
                 state.equipmentStopped = fbState.equipmentStopped || false;
             }
 
             if (fbRounds) {
                 state.rounds = Object.values(fbRounds);
             }
+            state.roundNumber = state.rounds.length + 1;
 
             if (fbMeasurements) {
                 state.measurements = Object.values(fbMeasurements);
@@ -60,6 +60,7 @@ async function loadState() {
         try {
             const parsed = JSON.parse(saved);
             Object.assign(state, parsed);
+            state.roundNumber = state.rounds.length + 1;
         } catch (e) {
             console.warn('Could not load saved state:', e);
         }
@@ -88,24 +89,10 @@ function saveState() {
     }
 }
 
-// Save a round to Firebase
-function saveRoundToFirebase(round) {
+// Save all rounds to Firebase
+function saveRoundsToFirebase() {
     if (!isFirebaseReady()) return;
-    firebasePush('sepa-monitor/rounds', round);
-}
-
-// Delete a round from Firebase
-function deleteRoundFromFirebase(roundId) {
-    if (!isFirebaseReady()) return;
-    firebaseGet('sepa-monitor/rounds').then(data => {
-        if (!data) return;
-        for (const [key, val] of Object.entries(data)) {
-            if (val.id === roundId) {
-                firebaseRemove(`sepa-monitor/rounds/${key}`);
-                break;
-            }
-        }
-    });
+    firebaseSet('sepa-monitor/rounds', state.rounds);
 }
 
 // Save a measurement to Firebase
@@ -384,11 +371,11 @@ function completeRound() {
     };
 
     state.rounds.push(round);
-    state.roundNumber++;
+    state.roundNumber = state.rounds.length + 1;
     state.roundActive = false;
 
-    // Save round to Firebase
-    saveRoundToFirebase(round);
+    // Save rounds to Firebase
+    saveRoundsToFirebase();
 
     // Update speed KPI
     if (speed) {
@@ -450,8 +437,16 @@ function renderRoundHistory() {
 
 function deleteRound(id) {
     if (confirm('¿Está seguro de que desea eliminar esta ronda?')) {
-        deleteRoundFromFirebase(id);
         state.rounds = state.rounds.filter(r => r.id !== id);
+        // Re-index remaining rounds sequentially
+        state.rounds.forEach((r, idx) => {
+            r.number = idx + 1;
+        });
+        state.roundNumber = state.rounds.length + 1;
+
+        // Save rounds to Firebase
+        saveRoundsToFirebase();
+
         renderRoundHistory();
         updateKPIs();
         saveState();
@@ -819,8 +814,8 @@ async function init() {
                 const localUpdate = new Date(state.lastLocalUpdate || 0);
                 const remoteUpdate = new Date(data.lastUpdate);
                 if (remoteUpdate > localUpdate) {
-                    state.roundNumber = data.roundNumber || state.roundNumber;
                     state.equipmentStopped = data.equipmentStopped || false;
+                    state.roundNumber = state.rounds.length + 1;
                     updateKPIs();
                     restoreUI();
                 }
