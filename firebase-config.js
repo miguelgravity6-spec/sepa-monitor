@@ -3,13 +3,13 @@
 // Obtén estos datos desde Firebase Console > Configuración del proyecto > Tus apps > Web
 
 const firebaseConfig = {
-    apiKey: "PENDING_CONFIG",
-    authDomain: "PENDING_CONFIG",
-    databaseURL: "PENDING_CONFIG",
-    projectId: "PENDING_CONFIG",
-    storageBucket: "PENDING_CONFIG",
-    messagingSenderId: "PENDING_CONFIG",
-    appId: "PENDING_CONFIG"
+    apiKey: "AIzaSyDBlyEHseudXCQ2UlHDymIM0J00m5wKWuc",
+    authDomain: "sepa-monitor.firebaseapp.com",
+    databaseURL: "https://sepa-monitor-default-rtdb.firebaseio.com",
+    projectId: "sepa-monitor",
+    storageBucket: "sepa-monitor.firebasestorage.app",
+    messagingSenderId: "231858141887",
+    appId: "1:231858141887:web:f49ab4dd9dfbf4e10ce40a"
 };
 
 // Initialize Firebase
